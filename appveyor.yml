@@ -1,0 +1,30 @@
+shallow_clone: true
+
+environment:
+  matrix:
+  - LUA: "lua 5.1"
+  - LUA: "lua 5.2"
+  - LUA: "lua 5.3"
+  - LUA: "luajit 2.0"
+  - LUA: "luajit 2.1"
+
+configuration:
+  - vs08_32
+  - vs_64
+  - mingw
+
+install:
+  - set PATH=%CD%\env\bin;C:\Python27\Scripts;C:\MinGW\bin;%PATH%
+  - pip install hererocks
+  - hererocks env --%LUA% --target %configuration% -r latest
+  - git clone --depth=1 https://github.com/keplerproject/luacov
+  - cd luacov && luarocks make && cd ..
+
+build_script:
+  - luarocks make
+
+test_script:
+  - cd luacov
+  - lua tests\linescanner.lua
+  - lua tests\filefilter.lua
+  - lua tests\cli.lua
