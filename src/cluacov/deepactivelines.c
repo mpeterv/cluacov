@@ -54,6 +54,7 @@ static void add_activelines(lua_State *L, GCproto *proto) {
     ** LuaJIT packs active lines depending on function length.
     ** See implementation of lj_debug_getinfo in lj_debug.c.
     */
+    ptrdiff_t idx;
     const void *lineinfo = proto_lineinfo(proto);
 
     if (lineinfo) {
@@ -76,8 +77,6 @@ static void add_activelines(lua_State *L, GCproto *proto) {
     ** LuaJIT stores nested prototypes as garbage-collectible constants,
     ** iterate over them. See implementation of jit_util_funck in lib_jit.c.
     */
-    ptrdiff_t idx;
-
     for (idx = -1; ~idx < (ptrdiff_t) proto->sizekgc; idx--) {
         GCobj *gc = proto_kgc(proto, idx);
 
