@@ -19,17 +19,24 @@ static const char *get_source_filename(lua_State *L, lua_Integer level) {
         ** Ignore Lua code loaded from raw strings,
         ** unless runner.configuration.codefromstrings is true.
         */
+        int codefromstrings;
         lua_getfield(L, lua_upvalueindex(1), "configuration");
         lua_getfield(L, -1, "codefromstrings");
-        int codefromstrings = lua_toboolean(L, -1);
+        codefromstrings = lua_toboolean(L, -1);
         lua_pop(L, 2);
         return codefromstrings ? ar.source : NULL;
     }
 }
 
 static int l_debug_hook(lua_State *L) {
-    lua_Integer line_nr = luaL_checkinteger(L, 2);
-    lua_Integer level = luaL_optinteger(L, 3, 2);
+    const char *filename;
+    lua_Integer line_nr, max_line_nr;
+    lua_Integer hits, max_hits;
+    lua_Integer steps_after_save, save_step_size;
+    lua_Integer level;
+
+    line_nr = luaL_checkinteger(L, 2);
+    level = luaL_optinteger(L, 3, 2);
     lua_settop(L, 0);
 
     lua_getfield(L, lua_upvalueindex(1), "initialized");
@@ -40,7 +47,7 @@ static int l_debug_hook(lua_State *L) {
 
     lua_pop(L, 1);
 
-    const char *filename = get_source_filename(L, level);
+    filename = get_source_filename(L, level);
 
     if (filename == NULL) {
         return 0;
@@ -88,7 +95,7 @@ static int l_debug_hook(lua_State *L) {
 
     /* Update max line number for this file if necessary. */
     lua_getfield(L, -1, "max");
-    lua_Integer max_line_nr = lua_tointeger(L, -1);
+    max_line_nr = lua_tointeger(L, -1);
     lua_pop(L, 1);
 
     if (line_nr > max_line_nr) {
@@ -101,14 +108,14 @@ static int l_debug_hook(lua_State *L) {
     lua_pushinteger(L, line_nr);
     lua_gettable(L, -3);
     /* Conveniently, lua_tointeger returns 0 on non-number. */
-    lua_Integer hits = lua_tointeger(L, -1) + 1;
+    hits = lua_tointeger(L, -1) + 1;
     lua_pop(L, 1);
     lua_pushinteger(L, hits);
     lua_settable(L, -3);
 
     /* Update max number of hits if necessary. */
     lua_getfield(L, -1, "max_hits");
-    lua_Integer max_hits = lua_tointeger(L, -1);
+    max_hits = lua_tointeger(L, -1);
     lua_pop(L, 1);
 
     if (hits > max_hits) {
@@ -125,17 +132,18 @@ static int l_debug_hook(lua_State *L) {
 
     lua_getfield(L, lua_upvalueindex(1), "configuration");
     lua_getfield(L, -1, "savestepsize");
-    lua_Integer save_step_size = lua_tointeger(L, -1);
+    save_step_size = lua_tointeger(L, -1);
     lua_pop(L, 2);
 
-    lua_Integer steps_after_save = lua_tointeger(L, lua_upvalueindex(3)) + 1;
+    steps_after_save = lua_tointeger(L, lua_upvalueindex(3)) + 1;
 
     if (steps_after_save == save_step_size) {
+        int paused;
         steps_after_save = 0;
 
         /* Unless runner.paused, save data. */
         lua_getfield(L, lua_upvalueindex(1), "paused");
-        int paused = lua_toboolean(L, -1);
+        paused = lua_toboolean(L, -1);
         lua_pop(L, 1);
 
         if (!paused) {
