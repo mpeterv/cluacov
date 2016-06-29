@@ -19,11 +19,13 @@ install:
   - hererocks env --%LUA% --target %configuration% -r latest
   - git clone --depth=1 https://github.com/keplerproject/luacov
   - cd luacov && luarocks make && cd ..
+  - luarocks install busted
 
 build_script:
   - luarocks make
 
 test_script:
+  - busted
   - cd luacov
   - lua tests\linescanner.lua
   - lua tests\filefilter.lua

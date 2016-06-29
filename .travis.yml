@@ -14,9 +14,11 @@ before_install:
   - export PATH="$PWD/env/bin:$PATH"
   - git clone --depth=1 https://github.com/keplerproject/luacov
   - cd luacov && luarocks make && cd ..
+  - luarocks install busted
 
 install:
   - luarocks make
 
 script:
+  - busted
   - make -C luacov test
