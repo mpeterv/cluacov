@@ -2,23 +2,23 @@ language: python
 sudo: false
 
 env:
-  - LUA="lua 5.1"
-  - LUA="lua 5.2"
-  - LUA="lua 5.3"
-  - LUA="luajit 2.0"
-  - LUA="luajit 2.1"
+  - LUA="lua=5.1"
+  - LUA="lua=5.2"
+  - LUA="lua=5.3"
+  - LUA="luajit=2.0"
+  - LUA="luajit=2.1"
 
 before_install:
   - pip install hererocks
-  - hererocks env --$LUA -r latest
-  - export PATH="$PWD/env/bin:$PATH"
+  - hererocks lua_install --$LUA -r latest
+  - source lua_install/bin/activate
   - git clone --depth=1 https://github.com/keplerproject/luacov
   - cd luacov && luarocks make && cd ..
   - luarocks install busted
 
 install:
-  - luarocks make
+  - luarocks make --deps-mode=none
 
 script:
   - busted
-  - make -C luacov test
+  - busted -C luacov
