@@ -6,15 +6,15 @@ source = {
 description = {
    summary = "C extensions for LuaCov",
    detailed = [[
-      Optional C extensions for LuaCov, improving performance and reducing
-      number of lines incorrectly marked as missed. Depends on LuaCov.
+Optional C extensions for LuaCov, improving performance and reducing
+number of lines incorrectly marked as missed. Depends on LuaCov.
    ]],
    homepage = "https://github.com/mpeterv/cluacov",
-   license = "MIT/X11"
+   license = "MIT"
 }
 dependencies = {
    "lua >= 5.1, < 5.4",
-   "luacov >= 0.12.0, < 0.13.0"
+   "luacov >= 0.13.0"
 }
 build = {
    type = "builtin",
